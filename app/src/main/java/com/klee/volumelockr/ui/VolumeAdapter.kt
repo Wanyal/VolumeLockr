@@ -132,7 +132,7 @@ class VolumeAdapter(
             })
         holder.binding.slider.addOnSliderTouchListener(object : Slider.OnSliderTouchListener {
             override fun onStartTrackingTouch(slider: Slider) {
-                // user started dragging
+                // user started dragging the slider, do nothing
             }
 
             override fun onStopTrackingTouch(slider: Slider) {
