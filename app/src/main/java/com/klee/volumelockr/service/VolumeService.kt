@@ -113,9 +113,50 @@ class VolumeService() : Service() {
     fun getVolumesPresets(): List<Volume> {
         val volumes = mVolumeProvider.getVolumes()
         volumes.forEach { volume ->
-            volume.value = mVolumePreset[volume.stream] ?: 0
+            volume.value = mVolumePreset[volume.stream] ?: getSavedVolumePreset(volume.stream)
         }
         return volumes
+    }
+
+    private fun getSavedVolumePreset(stream: Int): Int {
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+
+        when (stream) {
+            AudioManager.STREAM_MUSIC -> return sharedPreferences.getInt(
+                SettingsFragment.MEDIA_VOLUME_PRESET_PREFERENCE,
+                VolumeProvider.MIN_MUSIC_VOLUME
+            ).coerceIn(
+                VolumeProvider.MIN_MUSIC_VOLUME,
+                mVolumeProvider.fetchMaxVolume(AudioManager.STREAM_MUSIC)
+            )
+
+            AudioManager.STREAM_VOICE_CALL -> return sharedPreferences.getInt(
+                SettingsFragment.CALL_VOLUME_PRESET_PREFERENCE,
+                VolumeProvider.MIN_CALL_VOLUME
+            ).coerceIn(
+                VolumeProvider.MIN_CALL_VOLUME,
+                mVolumeProvider.fetchMaxVolume(AudioManager.STREAM_VOICE_CALL)
+            )
+
+            AudioManager.STREAM_NOTIFICATION -> return sharedPreferences.getInt(
+                SettingsFragment.NOTIFICATION_VOLUME_PRESET_PREFERENCE,
+                VolumeProvider.MIN_NOTIFICATION_VOLUME
+            ).coerceIn(
+                VolumeProvider.MIN_NOTIFICATION_VOLUME, mVolumeProvider.fetchMaxVolume(
+                    AudioManager.STREAM_NOTIFICATION
+                )
+            )
+
+            AudioManager.STREAM_ALARM -> return sharedPreferences.getInt(
+                SettingsFragment.ALARM_VOLUME_PRESET_PREFERENCE,
+                VolumeProvider.MIN_ALARM_VOLUME
+            ).coerceIn(
+                VolumeProvider.MIN_ALARM_VOLUME,
+                mVolumeProvider.fetchMaxVolume(AudioManager.STREAM_ALARM)
+            )
+
+            else -> return  1
+        }
     }
 
     @Synchronized
