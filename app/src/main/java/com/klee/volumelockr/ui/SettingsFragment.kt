@@ -320,8 +320,4 @@ class ChangePresetDialog : DialogFragment() {
 
         return dialog
     }
-
-    fun getVolumes(): List<Volume> {
-        return volumes;
-    }
 }

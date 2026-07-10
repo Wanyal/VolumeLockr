@@ -20,8 +20,6 @@ import androidx.preference.PreferenceManager
 import com.klee.volumelockr.R
 import com.klee.volumelockr.databinding.FragmentVolumeSliderBinding
 import com.klee.volumelockr.service.VolumeService
-import com.klee.volumelockr.ui.VolumeSliderFragmentArgs
-
 class VolumeSliderFragment : Fragment() {
 
     private var _binding: FragmentVolumeSliderBinding? = null

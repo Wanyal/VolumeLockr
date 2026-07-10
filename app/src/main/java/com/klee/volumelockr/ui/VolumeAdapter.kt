@@ -16,7 +16,6 @@ import com.google.android.material.slider.Slider
 import com.klee.volumelockr.R
 import com.klee.volumelockr.databinding.VolumeCardBinding
 import com.klee.volumelockr.service.VolumeService
-import kotlin.math.max
 import com.google.android.material.R as MaterialR
 
 class VolumeAdapter(
@@ -151,7 +150,7 @@ class VolumeAdapter(
             if (isLocked) {
                 onVolumeUnlocked(holder, volume)
             } else {
-                onVolumeLocked(holder, volume, false)
+                onVolumeLocked(holder, volume)
             }
         }
     }
@@ -204,7 +203,7 @@ class VolumeAdapter(
         }
     }
 
-    private fun onVolumeLocked(holder: ViewHolder, volume: Volume, fromLockAll: Boolean) {
+    private fun onVolumeLocked(holder: ViewHolder, volume: Volume) {
 
         mService?.let {
             it.addLock(volume.stream, volume.value, false)

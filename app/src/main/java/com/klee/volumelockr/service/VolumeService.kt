@@ -29,8 +29,6 @@ import com.klee.volumelockr.ui.SettingsFragment.Companion.ALLOW_LOWER_PREFERENCE
 import com.klee.volumelockr.ui.Volume
 import java.util.Timer
 import java.util.TimerTask
-import kotlin.math.max
-
 class VolumeService() : Service() {
 
     companion object {
