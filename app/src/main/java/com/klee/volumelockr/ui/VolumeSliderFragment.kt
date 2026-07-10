@@ -13,11 +13,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.navArgs
 import androidx.preference.PreferenceManager
 import com.klee.volumelockr.R
 import com.klee.volumelockr.databinding.FragmentVolumeSliderBinding
 import com.klee.volumelockr.service.VolumeService
+import com.klee.volumelockr.ui.VolumeSliderFragmentArgs
 
 class VolumeSliderFragment : Fragment() {
 
@@ -26,6 +29,8 @@ class VolumeSliderFragment : Fragment() {
     private var mAdapter: VolumeAdapter? = null
     private var mService: VolumeService? = null
     private var isServiceBound = false
+    private val args: VolumeSliderFragmentArgs by navArgs()
+    private var inPreferenceMode: Boolean = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -33,6 +38,8 @@ class VolumeSliderFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentVolumeSliderBinding.inflate(inflater, container, false)
+        inPreferenceMode = args.inPreferenceMode
+
         return binding.root
     }
 
@@ -43,6 +50,8 @@ class VolumeSliderFragment : Fragment() {
         } ?: Intent(context, VolumeService::class.java).also { intent ->
             context?.bindService(intent, connection, Context.BIND_AUTO_CREATE)
         }
+        inPreferenceMode = args.inPreferenceMode
+
     }
 
     override fun onPause() {
@@ -60,8 +69,15 @@ class VolumeSliderFragment : Fragment() {
 
     private fun setupRecyclerView(service: VolumeService) {
         val spanCount = if (resources.getBoolean(R.bool.use_two_columns)) 2 else 1
-        binding.recyclerView.layoutManager = androidx.recyclerview.widget.GridLayoutManager(requireContext(), spanCount)
-        mAdapter = VolumeAdapter(service.getVolumes(), service, requireContext()).also { adapter ->
+        binding.recyclerView.layoutManager =
+            androidx.recyclerview.widget.GridLayoutManager(requireContext(), spanCount)
+        mAdapter = VolumeAdapter(
+            service.getVolumes(),
+            service,
+            requireContext(),
+            null,
+            inPreferenceMode
+        ).also { adapter ->
             adapter.onLockStateChanged = { updateSubtitle() }
         }
         binding.recyclerView.adapter = mAdapter
@@ -76,7 +92,7 @@ class VolumeSliderFragment : Fragment() {
     private fun lockAll() {
         val service = mService ?: return
         service.getVolumes().forEach { volume ->
-            service.addLock(volume.stream, volume.value)
+            service.addLock(volume.stream, volume.value, true)
         }
         VolumeService.start(requireContext())
         service.startLocking()
@@ -101,10 +117,17 @@ class VolumeSliderFragment : Fragment() {
     }
 
     private fun updateQuickActionState() {
-        val isProtected = PreferenceManager.getDefaultSharedPreferences(requireContext())
-            .getBoolean(SettingsFragment.PASSWORD_PROTECTED_PREFERENCE, false)
-        binding.lockAllChip.isEnabled = !isProtected
-        binding.unlockAllChip.isEnabled = !isProtected
+        if (inPreferenceMode) {
+            binding.lockAllChip.isEnabled = false
+            binding.unlockAllChip.isEnabled = false
+            binding.lockAllChip.isVisible = false
+            binding.unlockAllChip.isVisible = false
+        } else {
+            val isProtected = PreferenceManager.getDefaultSharedPreferences(requireContext())
+                .getBoolean(SettingsFragment.PASSWORD_PROTECTED_PREFERENCE, false)
+            binding.lockAllChip.isEnabled = !isProtected
+            binding.unlockAllChip.isEnabled = !isProtected
+        }
     }
 
     private fun updateSubtitle() {
@@ -163,5 +186,9 @@ class VolumeSliderFragment : Fragment() {
 
         mService = null
         mAdapter = null
+    }
+
+    fun getVolumePresets(): List<Volume> {
+        return mService?.getVolumesPresets() ?: emptyList()
     }
 }
