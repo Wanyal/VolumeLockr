@@ -17,6 +17,8 @@ import com.klee.volumelockr.R
 import com.klee.volumelockr.databinding.VolumeCardBinding
 import com.klee.volumelockr.service.VolumeService
 import com.google.android.material.R as MaterialR
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 
 class VolumeAdapter(
     private var mVolumeList: List<Volume>,
@@ -264,6 +266,7 @@ class VolumeAdapter(
     }
 }
 
+@Parcelize
 data class Volume(
     val name: String,
     val stream: Int,
@@ -271,4 +274,4 @@ data class Volume(
     val min: Int,
     val max: Int,
     var locked: Boolean
-)
+) : Parcelable
