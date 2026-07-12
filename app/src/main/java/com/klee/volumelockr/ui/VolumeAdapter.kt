@@ -95,14 +95,17 @@ class VolumeAdapter(
 
         loadLockFromService(holder, volume)
 
-        handleRingerMode(holder, volume)
         if (mInPreferencesMode) {
             holder.binding.lockButton.isEnabled = false
             holder.binding.lockButton.isVisible = false
 
-        } else if (isPasswordProtected()) {
-            holder.binding.slider.isEnabled = false
-            holder.binding.lockButton.isEnabled = false
+        }else {
+            handleRingerMode(holder, volume)
+
+            if (isPasswordProtected()) {
+                holder.binding.slider.isEnabled = false
+                holder.binding.lockButton.isEnabled = false
+            }
         }
     }
 
