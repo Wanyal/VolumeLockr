@@ -15,7 +15,6 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.navArgs
 import androidx.preference.PreferenceManager
 import com.klee.volumelockr.R
 import com.klee.volumelockr.databinding.FragmentVolumeSliderBinding
@@ -27,8 +26,8 @@ class VolumeSliderFragment : Fragment() {
     private var mAdapter: VolumeAdapter? = null
     private var mService: VolumeService? = null
     private var isServiceBound = false
-    private val args: VolumeSliderFragmentArgs by navArgs()
-    private var inPreferenceMode: Boolean = false
+    private val inPreferenceMode: Boolean
+        get() = arguments?.let { VolumeSliderFragmentArgs.fromBundle(it).inPreferenceMode } ?: false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -36,7 +35,6 @@ class VolumeSliderFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentVolumeSliderBinding.inflate(inflater, container, false)
-        inPreferenceMode = args.inPreferenceMode
 
         return binding.root
     }
@@ -48,8 +46,6 @@ class VolumeSliderFragment : Fragment() {
         } ?: Intent(context, VolumeService::class.java).also { intent ->
             context?.bindService(intent, connection, Context.BIND_AUTO_CREATE)
         }
-        inPreferenceMode = args.inPreferenceMode
-
     }
 
     override fun onPause() {
@@ -165,9 +161,11 @@ class VolumeSliderFragment : Fragment() {
             setupQuickActions()
             updateSubtitle()
 
-            mService?.registerOnVolumeChangeListener(Handler(Looper.getMainLooper())) {
-                mAdapter?.update(it.getVolumes())
-                updateSubtitle()
+            if (!inPreferenceMode) {
+                mService?.registerOnVolumeChangeListener(Handler(Looper.getMainLooper())) {
+                    mAdapter?.update(it.getVolumes())
+                    updateSubtitle()
+                }
             }
         }
     }
